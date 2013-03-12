@@ -1,3 +1,6 @@
+#ifndef __GUARD_GF2Q__
+#define __GUARD_GF2Q__
+
 /************* Arithmetic in the finite field GF(2^q) for q = 16, 32, or 64. */
 
 #include <stdlib.h>   /* get rand() */
@@ -61,3 +64,5 @@ gf2q_t gf2q_add(gf2q_t x, gf2q_t y);
 gf2q_t gf2q_mul(gf2q_t x, gf2q_t y);
 /* Returns pseudorandom element. Seed with srand(). */
 gf2q_t gf2q_rand(void);
+
+#endif

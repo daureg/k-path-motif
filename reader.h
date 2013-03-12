@@ -1,3 +1,6 @@
+#ifndef __GUARD_READER__
+#define __GUARD_READER__
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -24,3 +27,5 @@ void graph_add_edge(graph_t* g, int u, int v);
 void graph_set_color(graph_t* g, int u, int c);
 void graph_read(graph_t** g, int** color_freq, int* n, int* m, int* k, int* c);
 void graph_print(graph_t* g, int* color_freq, int num_colors);
+
+#endif
