@@ -6,6 +6,7 @@ import fileinput
 
 def graphs_read(text):
     graph = {}
+    no_edges = 0
     for line in text:
         line = line.strip()
         if line[0] == '#':
@@ -26,6 +27,7 @@ def graphs_read(text):
             graph["num_vertices"] = n
             graph["num_edges"] = m
             graph["num_colors"] = c
+            graph["edges"] = {}
             for i in range(1, n+1):
                 graph[i] = (0, [])
 
@@ -40,6 +42,8 @@ def graphs_read(text):
 
             graph[i][1].append(j)
             graph[j][1].append(i)
+            graph["edges"][(min(i, j), max(i, j))] = no_edges
+            no_edges += 1
 
         if line[0] == 'c':
             if len(params) != 2:
