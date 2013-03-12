@@ -1,4 +1,5 @@
 *.swp
+*.pyc
 *.exe
 *.o
 *.zcov
