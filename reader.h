@@ -1,5 +1,5 @@
-#ifndef __GUARD_READER__
-#define __GUARD_READER__
+#ifndef GUARD_READER__
+#define GUARD_READER__
 
 #include <assert.h>
 #include <ctype.h>

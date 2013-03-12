@@ -1,5 +1,5 @@
-#ifndef __GUARD_GF2Q__
-#define __GUARD_GF2Q__
+#ifndef GUARD_GF2Q__
+#define GUARD_GF2Q__
 
 /************* Arithmetic in the finite field GF(2^q) for q = 16, 32, or 64. */
 
@@ -49,9 +49,9 @@ typedef unsigned short int  gf2q_t;   /* Represent GF(2^16) using 16 bits */
 #define GF2Q_MODULUS        0x002D
 #endif
 
-gf2q_t gf2q_zero  = 0; /* 0 in GF2Q */
-gf2q_t gf2q_unity = 1; /* 1 in GF2Q */
-gf2q_t gf2q_x     = 2; /* x in GF2Q; because the modulus is primitive,
+const static gf2q_t gf2q_zero  = 0; /* 0 in GF2Q */
+const static gf2q_t gf2q_unity = 1; /* 1 in GF2Q */
+const static gf2q_t gf2q_x     = 2; /* x in GF2Q; because the modulus is primitive,
                         * x is a generator for the multiplicative group */
 
 /* Test if zero. */
@@ -59,7 +59,7 @@ bool gf2q_is_zero(gf2q_t x);
 /* Test if unity. */
 bool gf2q_is_unity(gf2q_t x);
 /* Add two elements, return result. */
-gf2q_t gf2q_add(gf2q_t x, gf2q_t y);
+gf2q_t gf2q_add(const gf2q_t x, const gf2q_t y);
 /* Multiply two elements, return result. */
 gf2q_t gf2q_mul(gf2q_t x, gf2q_t y);
 /* Returns pseudorandom element. Seed with srand(). */
