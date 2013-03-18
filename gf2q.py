@@ -31,11 +31,37 @@ def gf2q_is_unity(x):
 
 # Add two elements, return result.
 def gf2q_add(x, y):
+    """Multiply two elements in GF_2^q and return the result.
+
+    >>> gf2q_add(74989, 75052)
+    449
+    """
     return x ^ y
 
 
-# Multiply two elements, return result.
 def gf2q_mul(x, y):
+    """Multiply two elements in GF_2^q and return the result.
+
+    For instance, according to Sage, with k=GF(2^32,'c'), the following
+    (k.fetch_int(74689)*k.fetch_int(44)).integer_representation()
+    evaluates to 2697596, which, for the curious, is also:
+    c^21 + c^19 + c^16 + c^13 + c^11 + c^8 + c^6 + c^5 + c^4 + c^3 + c^2
+    >>> gf2q_mul(74989, 44)
+    2697596L
+
+    1 is unity element
+    >>> gf2q_mul(74989, 0x1)
+    74989L
+
+    and ax, 0*x == 0
+    >>> gf2q_mul(74989, 0x0)
+    0L
+
+    Finally, because GF_2^q is close under multiplication, even two big numbers
+    must return something less than 2^q
+    >>> gf2q_mul(2532981596, 1299567181)
+    1692365615L
+    """
     f = int(0)
     z = gf2q_zero
     for j in range(GF2Q_Q):
@@ -52,9 +78,19 @@ def gf2q_mul(x, y):
     return z % (1 << GF2Q_Q)
 
 
-# Returns pseudorandom element. Seed with srand().
-# compare C rand() and randint()
 def gf2q_rand():
+    """Returns a pseudo random element of GF_2^q.
+
+    All elements must be in the field
+    >>> l=[gf2q_rand() for i in range(1000)];min(l)>= 0
+    True
+    >>> l=[gf2q_rand() for i in range(1000)];max(l)<= (1 << GF2Q_Q)-1
+    True
+
+    And we may expect that they don't repeat themselves to often.
+    >>> l=[gf2q_rand() for i in range(2000)]; gf2q_rand() not in l
+    True
+    """
     if GF2Q_Q % 8 != 0:
         raise ValueError("gf2q_rand: GF2Q_Q must be a multiple of 8")
     z = gf2q_zero
@@ -68,15 +104,5 @@ def gf2q_rand():
     return z
 
 if __name__ == '__main__':
-    o = 0x1
-    x = 0x124ed
-    y = 0x1252c
-    z = 0x2c
-    g = 2532981596
-    g2 = 1299567181
-    print('z ==0 {}'.format(gf2q_is_zero(0)))
-    print('o ==1 {}'.format(gf2q_is_unity(o)))
-    print('x+y {} (0x1c1)'.format(hex(gf2q_add(x, y))))
-    print('x*z {} (0x29297c)'.format(hex(gf2q_mul(x, z))))
-    print('g*g2 {} (1692365615)'.format(gf2q_mul(g, g2)))
-    print('r {}'.format(gf2q_rand()))
+    import doctest
+    doctest.testmod()
