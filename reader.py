@@ -4,7 +4,7 @@ import re
 import fileinput
 
 
-def graphs_read(text):
+def graphs_read(text, directed=False):
     graph = {}
     no_edges = 0
     for line in text:
@@ -40,9 +40,14 @@ def graphs_read(text):
             if i < 1 or i > n or i == j or j < 1 or j > n:
                 raise ValueError("invalid edge: {}".format(line))
 
-            graph[i][1].append(j)
-            graph[j][1].append(i)
-            graph["edges"][(min(i, j), max(i, j))] = no_edges
+            if directed:
+                graph[i][1].append(j)
+                graph["edges"][(i, j)] = no_edges
+            else:
+                graph[i][1].append(j)
+                graph[j][1].append(i)
+                graph["edges"][(min(i, j), max(i, j))] = no_edges
+
             no_edges += 1
 
         if line[0] == 'c':
@@ -60,7 +65,7 @@ def graphs_read(text):
             if len(params) != k:
                 raise ValueError("invalid motif: {}".format(line))
 
-            graph["motif"] = sorted(params)  # O(k ln k)
+            graph["motif"] = sorted(params)
             if graph["motif"][0] < 0 or graph["motif"][-1] > c:
                 raise ValueError("invalid motif: {}".format(line))
 
