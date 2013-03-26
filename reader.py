@@ -4,6 +4,15 @@ import re
 import fileinput
 
 
+class CNodes():
+    def __init__(self, color=-1, neighbors=None):
+        self.color = color
+        self.neighbors = [] if neighbors is None else neighbors
+
+    def __repr__(self):
+        return '{}({})'.format(self.color, ','.join(map(str, self.neighbors)))
+
+
 def graphs_read(text, directed=False):
     graph = {}
     no_edges = 0
@@ -28,8 +37,10 @@ def graphs_read(text, directed=False):
             graph["num_edges"] = m
             graph["num_colors"] = c
             graph["edges"] = {}
+            graph["nodes"] = set(range(1, n+1))
             for i in range(1, n+1):
                 graph[i] = (0, [])
+                graph[str(i)] = CNodes()
 
         if line[0] == 'e':
             if len(params) != 2:
@@ -46,6 +57,8 @@ def graphs_read(text, directed=False):
             else:
                 graph[i][1].append(j)
                 graph[j][1].append(i)
+                graph[str(i)].neighbors.append(j)
+                graph[str(j)].neighbors.append(i)
                 graph["edges"][(min(i, j), max(i, j))] = no_edges
 
             no_edges += 1
@@ -60,6 +73,7 @@ def graphs_read(text, directed=False):
                 raise ValueError("invalid color: {}".format(line))
 
             graph[i] = (d, graph[i][1])
+            graph[str(i)].color = d
 
         if line[0] == 'f':
             if len(params) != k:
