@@ -59,7 +59,7 @@ def graphs_read(text, directed=False):
                 graph[j][1].append(i)
                 graph[str(i)].neighbors.append(j)
                 graph[str(j)].neighbors.append(i)
-                graph["edges"][(min(i, j), max(i, j))] = no_edges
+                # graph["edges"][(min(i, j), max(i, j))] = no_edges
 
             no_edges += 1
 

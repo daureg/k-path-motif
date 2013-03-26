@@ -22,40 +22,23 @@ def find_k_path(g):
     k = len(F)
     lo = k*[-1]
 
-    def is_path(path):
-        for i in range(len(path)-1):
-            if path[i+1] not in graph[path[i]][1]:
-                return False
-
-        return True
-
-    def simplify(motif=None, permanently=False, nodes=None):
-        motif = graph["motif"] if not motif else motif
-        if nodes is None:
-            list_of_nodes = [n for n in graph.items() if type(n[0]) == int]
-        else:
-            list_of_nodes = [n for n in graph.items() if n[0] in nodes]
+    def simplify():
+        motif = graph["motif"]
+        list_of_nodes = [n for n in graph.items() if type(n[0]) == int]
         removed = []
         for label, node_info in list_of_nodes:
             # remove 0-degree nodes and those whose color is not in motif
             if node_info[0] not in motif or len(node_info[1]) == 0:
-                if permanently:
-                    graph.pop(label)
+                graph.pop(label)
                 removed.append(label)
 
         if len(removed) > 0:
-            initial_labels = set(map(lambda n: n[0], list_of_nodes)) if nodes is None else nodes
-            survivor = initial_labels - set(removed)
-            graph["nodes"] = survivor
-            if permanently:
-                graph["num_vertices"] -= len(removed)
-                for label in survivor:
-                    graph[label] = (graph[label][0],
-                                    [n for n in graph[label][1]
-                                     if n not in removed])
-
-        if not permanently:
-            return graph["nodes"] if removed != [] and nodes is not None else nodes
+            graph["nodes"] -= set(removed)
+            graph["num_vertices"] -= len(removed)
+            for label in graph["nodes"]:
+                graph[label] = (graph[label][0],
+                                [n for n in graph[label][1]
+                                 if n not in removed])
 
     def next_neighbors(nodes, path, motif):
         if path == []:
@@ -83,21 +66,6 @@ def find_k_path(g):
             return
 
         f, b = next_neighbors(nodes, path, motif)
-        # if len(path) > 0:
-        #     f, b = next_neighbors(nodes, path, motif)
-        #     if f == [] == b:
-        #         return
-
-        #     if len(f) > 0 and len(b) > 0:
-        #         forward = random.choice([True, False])
-        #     else:
-        #         forward = len(f) > 0
-
-        #     v = random.choice(f if forward else b)
-        # else:
-        #     forward = True
-        #     v = random.choice(list(nodes))
-
         alt = []
         for v in random.sample(f, min(len(f), len(f)/3+1)):
             p = path + [v]
@@ -117,15 +85,12 @@ def find_k_path(g):
             m = remove_one_color(motif, graph[v][0])
             alt.extend([(m, n, p), (motif, n, path)])
 
-        # alt = [(remove_one_color(motif, graph[v][0]), nodes - set([v]),
-        #         new_path), (motif, nodes - set([v]), path)]
         for m, n, p in alt:
             # it seems logical that the color filtering is more efficient when
             # done in next_neighbors because it occurs less often
-            # nn = set([i for i in n if graph[i][0] in m])
             yield len(p), branch(m, n, p)
 
-    simplify(permanently=True)
+    simplify()
     num = count()                                 # Helps avoid heap collisions
     Q = [(0, next(num),                           # Start with just the root
           branch(F, g["nodes"], []))]
@@ -138,7 +103,6 @@ def find_k_path(g):
     if len(solution) > 0 and not solution[0] < solution[-1]:
         solution.reverse()
 
-    # print(len(solution))
     return len(solution) == k, solution      # Return the solution
 
 graph = {}
@@ -147,7 +111,7 @@ all_inputs = ['example-input', 'no-16-6-1x6', 'no-16-6-2x3', 'no-16-7-1x7',
               'unique-16-6-1x6', 'unique-16-6-2x3', 'unique-16-7-1x7',
               'complete8', 'tenstars', 'small-no']
 
-all_inputs = [all_inputs[7]]
+# all_inputs = [all_inputs[0]]
 for testcase in all_inputs:
     with open(testcase+'.txt') as f:
         raw = f.readlines()
@@ -158,9 +122,8 @@ for testcase in all_inputs:
         for i in range(1):
             random.seed(13572)
             t0 = clock()
-            # exist, path = find_k_path(graph)
-            print graph
+            exist, path = find_k_path(graph)
             print "{}:{:.3f}s".format(i, clock() - t0)
-        # print "{}{}".format("yes " if exist else "no",
-        #                     " ".join(map(str, path)) if exist else "")
+        print "{}{}".format("yes " if exist else "no",
+                            " ".join(map(str, path)) if exist else "")
         # pycallgraph.make_dot_graph('star_wars.png')
