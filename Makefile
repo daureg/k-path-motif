@@ -75,3 +75,7 @@ astyle:
 
 dist: check clean
 	git archive --prefix=336978_Lefalher/ -o 336978_Lefalher.zip HEAD
+
+python:
+	python new_hopy.py > _tmp
+	diff -q _tmp gold

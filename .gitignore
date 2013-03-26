@@ -10,3 +10,4 @@ question/
 bin/
 *.tar.*
 .ycm_extra_conf*
+_tmp
