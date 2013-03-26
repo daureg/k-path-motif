@@ -43,7 +43,7 @@ def gf2q_mul(x, y):
     """Multiply two elements in GF_2^q and return the result.
 
     For instance, according to Sage, with k=GF(2^32,'c'), the following
-    (k.fetch_int(74689)*k.fetch_int(44)).integer_representation()
+    (k.fetch_int(74989)*k.fetch_int(44)).integer_representation()
     evaluates to 2697596, which, for the curious, is also:
     c^21 + c^19 + c^16 + c^13 + c^11 + c^8 + c^6 + c^5 + c^4 + c^3 + c^2
     >>> gf2q_mul(74989, 44)
