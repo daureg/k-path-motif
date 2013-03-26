@@ -6,6 +6,7 @@
 *.gc*
 covreport/
 zcov/
+question/
 bin/
 *.tar.*
 .ycm_extra_conf*
