@@ -15,7 +15,6 @@ class CNodes():
 
 def graphs_read(text, directed=False):
     graph = {}
-    no_edges = 0
     for line in text:
         line = line.strip()
         if line[0] == '#':
@@ -36,11 +35,9 @@ def graphs_read(text, directed=False):
             graph["num_vertices"] = n
             graph["num_edges"] = m
             graph["num_colors"] = c
-            graph["edges"] = {}
             graph["nodes"] = set(range(1, n+1))
             for i in range(1, n+1):
-                graph[i] = (0, [])
-                graph[str(i)] = CNodes()
+                graph[i] = CNodes()
 
         if line[0] == 'e':
             if len(params) != 2:
@@ -53,15 +50,9 @@ def graphs_read(text, directed=False):
 
             if directed:
                 graph[i][1].append(j)
-                graph["edges"][(i, j)] = no_edges
             else:
-                graph[i][1].append(j)
-                graph[j][1].append(i)
-                graph[str(i)].neighbors.append(j)
-                graph[str(j)].neighbors.append(i)
-                # graph["edges"][(min(i, j), max(i, j))] = no_edges
-
-            no_edges += 1
+                graph[i].neighbors.append(j)
+                graph[j].neighbors.append(i)
 
         if line[0] == 'c':
             if len(params) != 2:
@@ -72,8 +63,7 @@ def graphs_read(text, directed=False):
             if i < 1 or i > n or d < 1 or d > c:
                 raise ValueError("invalid color: {}".format(line))
 
-            graph[i] = (d, graph[i][1])
-            graph[str(i)].color = d
+            graph[i].color = d
 
         if line[0] == 'f':
             if len(params) != k:

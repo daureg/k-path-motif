@@ -4,7 +4,7 @@
 from heapq import heappush, heappop
 from itertools import count
 import random
-from reader import graphs_read
+from reader import graphs_read, CNodes
 from time import clock
 random.seed(13572)
 
@@ -28,7 +28,7 @@ def find_k_path(g):
         removed = []
         for label, node_info in list_of_nodes:
             # remove 0-degree nodes and those whose color is not in motif
-            if node_info[0] not in motif or len(node_info[1]) == 0:
+            if node_info.color not in motif or len(node_info.neighbors) == 0:
                 graph.pop(label)
                 removed.append(label)
 
@@ -36,17 +36,17 @@ def find_k_path(g):
             graph["nodes"] -= set(removed)
             graph["num_vertices"] -= len(removed)
             for label in graph["nodes"]:
-                graph[label] = (graph[label][0],
-                                [n for n in graph[label][1]
-                                 if n not in removed])
+                graph[label] = CNodes(graph[label].color,
+                                      [n for n in graph[label].neighbors
+                                       if n not in removed])
 
     def next_neighbors(nodes, path, motif):
         if path == []:
             return [], []
-        forward = [n for n in graph[path[-1]][1] if n in nodes
-                   and graph[n][0] in motif]
-        backward = [n for n in graph[path[0]][1] if n in nodes
-                    and graph[n][0] in motif]
+        forward = [n for n in graph[path[-1]].neighbors if n in nodes
+                   and graph[n].color in motif]
+        backward = [n for n in graph[path[0]].neighbors if n in nodes
+                    and graph[n].color in motif]
         return forward, backward
 
     def branch(motif, nodes, path):
@@ -70,19 +70,19 @@ def find_k_path(g):
         for v in random.sample(f, min(len(f), len(f)/3+1)):
             p = path + [v]
             n = nodes - set([v])
-            m = remove_one_color(motif, graph[v][0])
+            m = remove_one_color(motif, graph[v].color)
             alt.extend([(m, n, p), (motif, n, path)])
         for v in random.sample(b, min(len(b)/3+1, len(b))):
             p = [v] + path
             n = nodes - set([v])
-            m = remove_one_color(motif, graph[v][0])
+            m = remove_one_color(motif, graph[v].color)
             alt.extend([(m, n, p), (motif, n, path)])
 
         if path == []:
             v = random.choice(list(nodes))
             p = [v]
             n = nodes - set([v])
-            m = remove_one_color(motif, graph[v][0])
+            m = remove_one_color(motif, graph[v].color)
             alt.extend([(m, n, p), (motif, n, path)])
 
         for m, n, p in alt:
@@ -108,7 +108,9 @@ def find_k_path(g):
 graph = {}
 ograph = {}
 all_inputs = ['example-input', 'no-16-6-1x6', 'no-16-6-2x3', 'no-16-7-1x7',
-              'unique-16-6-1x6', 'unique-16-6-2x3', 'unique-16-7-1x7',
+              'unique-16-6-1x6',
+              # 'unique-16-6-2x3',
+              'unique-16-7-1x7',
               'complete8', 'tenstars', 'small-no']
 
 # all_inputs = [all_inputs[0]]
