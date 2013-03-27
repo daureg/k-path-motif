@@ -9,11 +9,9 @@ from time import clock
 random.seed(13572)
 
 
-def remove_one_color(full, one):
-    if one not in full:
-        return full
-    pos = full.index(one)
-    return full[:pos]+full[pos+1:]
+def remove_one_color(motif, color):
+    pos = motif.index(color)
+    return motif[:pos]+motif[pos+1:]
 
 
 def find_k_path(g):
@@ -40,7 +38,7 @@ def find_k_path(g):
                                       [n for n in graph[label].neighbors
                                        if n not in removed])
 
-    def next_neighbors(nodes, path, motif):
+    def next_neighbors(motif, nodes, path):
         if path == []:
             return [], []
         forward = [n for n in graph[path[-1]].neighbors if n in nodes
@@ -51,7 +49,6 @@ def find_k_path(g):
 
     def branch(motif, nodes, path):
         k = len(g['motif'])
-        # print len(motif), len(nodes), len(path)
         # abort early if there is no more hope
         if len(nodes) < len(motif):
             return
@@ -65,7 +62,7 @@ def find_k_path(g):
         if len(nodes) == 0:
             return
 
-        f, b = next_neighbors(nodes, path, motif)
+        f, b = next_neighbors(motif, nodes, path)
         alt = []
         for v in random.sample(f, min(len(f), len(f)/3+1)):
             p = path + [v]
