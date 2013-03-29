@@ -4,9 +4,8 @@
 from heapq import heappush, heappop
 from itertools import count
 import random
-from reader import graphs_read, CNodes
+from reader import graphs_read
 from time import clock
-random.seed(13572)
 
 
 def remove_one_color(motif, color):
@@ -18,7 +17,42 @@ def find_k_path(g):
     graph = g
     F = g["motif"]
     k = len(F)
-    lo = k*[-1]
+
+    def remaining_motif(path):
+        motif = g["motif"]
+        for node in path:
+            motif = remove_one_color(motif, g[node].color)
+        return motif
+
+    def complete_path(path):
+        if len(path) < k-1:
+            return path
+        last_color = remaining_motif(path)
+        f, b = next_neighbors(last_color, g["nodes"] - set(path), path)
+        for node in f:
+            if g[node].color == last_color[0]:
+                return path + [node]
+        for node in b:
+            if g[node].color == last_color[0]:
+                return [node] + path
+        return path
+
+    def find_sub_path(nodes, initial_guess):
+        num = count()
+        Q = [(0, next(num), branch(remaining_motif(initial_guess),
+                                   nodes, initial_guess))]
+        keep = []
+        while Q:
+            _, _, r = heappop(Q)
+            for b, u, p, s in r:
+                keep = p
+                heappush(Q, (b, next(num), u))
+
+        solution = complete_path(keep)
+        if len(solution) > 0 and not solution[0] < solution[-1]:
+            solution.reverse()
+
+        return len(solution) == k, solution
 
     def simplify():
         motif = graph["motif"]
@@ -34,9 +68,8 @@ def find_k_path(g):
             graph["nodes"] -= set(removed)
             graph["num_vertices"] -= len(removed)
             for label in graph["nodes"]:
-                graph[label] = CNodes(graph[label].color,
-                                      [n for n in graph[label].neighbors
-                                       if n not in removed])
+                graph[label].neighbors = [n for n in graph[label].neighbors
+                                          if n not in removed]
 
     def next_neighbors(motif, nodes, path):
         if path == []:
@@ -54,10 +87,6 @@ def find_k_path(g):
             return
         if len(path) > k or (len(nodes) == 0 and len(path) < k):
             return
-
-        if len(path) > len([i for i in lo if i != -1]):
-            for k, n in enumerate(path):
-                lo[k] = n
 
         if len(nodes) == 0:
             return
@@ -85,22 +114,13 @@ def find_k_path(g):
         for m, n, p in alt:
             # it seems logical that the color filtering is more efficient when
             # done in next_neighbors because it occurs less often
-            yield len(p), branch(m, n, p)
+            yield len(p), branch(m, n, p), p, n
 
     simplify()
-    num = count()                                 # Helps avoid heap collisions
-    Q = [(0, next(num),                           # Start with just the root
-          branch(F, g["nodes"], []))]
-    while Q:                                      # Any nodes left?
-        _, _, r = heappop(Q)                      # Get one
-        for b, u in r:                            # Expand it ...
-            heappush(Q, (b, next(num), u))        # ... and push the children
-
-    solution = [i for i in lo if i >= 0]
-    if len(solution) > 0 and not solution[0] < solution[-1]:
-        solution.reverse()
-
-    return len(solution) == k, solution      # Return the solution
+    # for l, b, p, s in branch(F, g["nodes"], [], True):
+    #     for _, _, np, ns in b:
+    #         print '{}: {} -> {} {}'.format(l, p, np, ns)
+    return find_sub_path(g["nodes"], [])
 
 graph = {}
 ograph = {}
@@ -110,7 +130,7 @@ all_inputs = ['example-input', 'no-16-6-1x6', 'no-16-6-2x3', 'no-16-7-1x7',
               'unique-16-7-1x7',
               'complete8', 'tenstars', 'small-no']
 
-# all_inputs = [all_inputs[0]]
+all_inputs = [all_inputs[0]]
 for testcase in all_inputs:
     with open(testcase+'.txt') as f:
         raw = f.readlines()
