@@ -8,13 +8,11 @@ no-16-7-1x7
 no
 unique-16-6-1x6
 yes 8 6 5 9 13 16
-unique-16-6-2x3
-yes 2 15 7 8 5 9
 unique-16-7-1x7
 yes 3 7 14 4 11 16 15
 complete8
-yes 2 4 3 6 1 5 8 7
+yes 1 2 6 3 4 7 5 8
 tenstars
-yes 2 6 10 9 8
+yes 3 6 2 5 8
 small-no
 no
