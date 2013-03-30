@@ -13,14 +13,19 @@ if __name__ == '__main__':
     pool = []
     pool.append(Process(target=find, args=(q, None, False, 0.3)))
     pool.append(Process(target=find, args=(q, None, False, 0.8)))
-    pool.append(Process(target=find, args=(q, None, True, 1.3)))
+    pool.append(Process(target=find, args=(q, None, False, 1.3)))
     pool.append(Process(target=find, args=(q, None, False, 1.9)))
     for p in pool:
         p.start()
+    num_answer = 0
     while True:
         exist, path = q.get()
+        num_answer += 1
         if exist:
-            for p in pool:
-                p.terminate()
             print path
             break
+        if num_answer == len(pool):
+            break
+
+    for p in pool:
+        p.terminate()
