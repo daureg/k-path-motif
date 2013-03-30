@@ -1,9 +1,8 @@
 #! /usr/bin/python2
 # vim: set fileencoding=utf-8
-# import pycallgraph
 from heapq import heappush, heappop
 from itertools import count
-import random
+from random import choice, sample, seed
 from reader import graphs_read
 from time import clock
 
@@ -15,8 +14,6 @@ def remove_one_color(motif, color):
 
 def find_k_path(g):
     graph = g
-    F = g["motif"]
-    k = len(F)
 
     def remaining_motif(path):
         motif = g["motif"]
@@ -24,31 +21,20 @@ def find_k_path(g):
             motif = remove_one_color(motif, g[node].color)
         return motif
 
-    def complete_path(path):
-        if len(path) < k-1:
-            return path
-        last_color = remaining_motif(path)
-        f, b = next_neighbors(last_color, g["nodes"] - set(path), path)
-        for node in f:
-            if g[node].color == last_color[0]:
-                return path + [node]
-        for node in b:
-            if g[node].color == last_color[0]:
-                return [node] + path
-        return path
-
     def find_sub_path(nodes, initial_guess):
         num = count()
         Q = [(0, next(num), branch(remaining_motif(initial_guess),
                                    nodes, initial_guess))]
-        keep = []
+        k = len(g['motif'])
+        solution = []
         while Q:
             _, _, r = heappop(Q)
             for b, u, p, s in r:
-                keep = p
+                if b == k:
+                    solution = p
+                    break
                 heappush(Q, (b, next(num), u))
 
-        solution = complete_path(keep)
         if len(solution) > 0 and not solution[0] < solution[-1]:
             solution.reverse()
 
@@ -59,17 +45,18 @@ def find_k_path(g):
         list_of_nodes = [n for n in graph.items() if type(n[0]) == int]
         removed = []
         for label, node_info in list_of_nodes:
+            graph[label].neighbors = set(graph[label].neighbors)
             # remove 0-degree nodes and those whose color is not in motif
             if node_info.color not in motif or len(node_info.neighbors) == 0:
                 graph.pop(label)
                 removed.append(label)
 
         if len(removed) > 0:
-            graph["nodes"] -= set(removed)
+            removed = set(removed)
+            graph["nodes"] -= removed
             graph["num_vertices"] -= len(removed)
             for label in graph["nodes"]:
-                graph[label].neighbors = [n for n in graph[label].neighbors
-                                          if n not in removed]
+                graph[label].neighbors -= removed
 
     def next_neighbors(motif, nodes, path):
         if path == []:
@@ -93,19 +80,19 @@ def find_k_path(g):
 
         f, b = next_neighbors(motif, nodes, path)
         alt = []
-        for v in random.sample(f, min(len(f), len(f)/3+1)):
+        for v in sample(f, min(len(f), len(f)/3+1)):
             p = path + [v]
             n = nodes - set([v])
             m = remove_one_color(motif, graph[v].color)
             alt.extend([(m, n, p), (motif, n, path)])
-        for v in random.sample(b, min(len(b)/3+1, len(b))):
+        for v in sample(b, min(len(b)/3+1, len(b))):
             p = [v] + path
             n = nodes - set([v])
             m = remove_one_color(motif, graph[v].color)
             alt.extend([(m, n, p), (motif, n, path)])
 
         if path == []:
-            v = random.choice(list(nodes))
+            v = choice(list(nodes))
             p = [v]
             n = nodes - set([v])
             m = remove_one_color(motif, graph[v].color)
@@ -136,13 +123,11 @@ for testcase in all_inputs:
         raw = f.readlines()
 
     for graph in graphs_read(raw):
-        # pycallgraph.start_trace()
         print testcase
         for i in range(1):
-            random.seed(13572)
+            seed(13572)
             t0 = clock()
             exist, path = find_k_path(graph)
             print "{}:{:.3f}s".format(i, clock() - t0)
         print "{}{}".format("yes " if exist else "no",
                             " ".join(map(str, path)) if exist else "")
-        # pycallgraph.make_dot_graph('star_wars.png')
