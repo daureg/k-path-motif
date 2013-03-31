@@ -71,6 +71,15 @@ def find_k_path(msg, g, remaining=None, path=None):
                     and graph[n].color in motif]
         return forward, backward
 
+    def some_neighbors(all, fraction=0.33):
+        return sample(all, min(len(all), int(len(all)*fraction+1)))
+
+    def build_alternatives(path, old_nodes, new_node, motif, forward=True):
+        p = path + [new_node] if forward else [new_node] + path
+        n = old_nodes - set([new_node])
+        m = remove_one_color(motif, graph[new_node].color)
+        return [(m, n, p), (motif, n, path)]
+
     def branch(motif, nodes, path):
         k = len(g['motif'])
         # abort early if there is no more hope
@@ -84,24 +93,15 @@ def find_k_path(msg, g, remaining=None, path=None):
 
         f, b = next_neighbors(motif, nodes, path)
         alt = []
-        # TODO refactor
-        for v in sample(f, min(len(f), len(f)/3+1)):
-            p = path + [v]
-            n = nodes - set([v])
-            m = remove_one_color(motif, graph[v].color)
-            alt.extend([(m, n, p), (motif, n, path)])
-        for v in sample(b, min(len(b)/3+1, len(b))):
-            p = [v] + path
-            n = nodes - set([v])
-            m = remove_one_color(motif, graph[v].color)
-            alt.extend([(m, n, p), (motif, n, path)])
+
+        for v in some_neighbors(f):
+            alt.extend(build_alternatives(path, nodes, v, motif))
+        for v in some_neighbors(b):
+            alt.extend(build_alternatives(path, nodes, v, motif, False))
 
         if path == []:
             v = choice(list(nodes))
-            p = [v]
-            n = nodes - set([v])
-            m = remove_one_color(motif, graph[v].color)
-            alt.extend([(m, n, p), (motif, n, path)])
+            alt.extend(build_alternatives(path, nodes, v, motif))
 
         for m, n, p in alt:
             # it seems logical that the color filtering is more efficient when
