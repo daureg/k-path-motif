@@ -1,0 +1,34 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\usetikzlibrary{positioning,calc}
+\usepgfplotslibrary{units}
+\pgfplotsset{compat=newest}
+\begin{document}
+\begin{tikzpicture}
+\begin{axis}[
+ymin=0,
+% bar width=5pt,
+every non boxed x axis/.style={
+x axis line style={},
+enlarge x limits=true,
+},
+axis x line=bottom,
+axis y line=left,
+ylabel={count},
+xlabel={time},
+x unit={ms},
+y label style={rotate=-90,font=\tiny},
+x label style={font=\tiny},
+ticklabel style={font=\tiny},
+title={INSTANCE},
+% legend style={font=\tiny, at={(.5,1.15)}, anchor=south}
+]
+\addplot[ybar, fill=green!75, draw=green!70!black,thin] table[x index=0,y index=2]{hist-INSTANCE.dat};
+\addplot[only marks,mark=*, mark options={color=blue,scale=0.3}] table[x index=0,y index=1] {hist-INSTANCE.dat};
+\addplot[very thin, smooth, solid, black, no marks] table[x index=0,y index=1] {pdf-INSTANCE.dat};
+\node[] (av) at (axis cs:AVERAGE,0) {};
+% \legend{values of the feature, corresponding value of the cdf, fitted normal distribution};
+\end{axis}
+\draw[black] ($(av) +(0,4pt)$) -- ($(av) +(0,-4pt)$) node[below=4pt,anchor=north,font=\tiny] {$\bar{x}=AVERAGE$};
+\end{tikzpicture}
+\end{document}
